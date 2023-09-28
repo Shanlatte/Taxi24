@@ -5,6 +5,10 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { PersonModule } from './person/person.module';
 import { Person } from './person/entities/person.entity';
+import { DriversModule } from './drivers/drivers.module';
+import { LocationsModule } from './locations/locations.module';
+import { Driver } from './drivers/entities/driver.entity';
+import { Location } from './locations/entities/location.entity';
 
 @Module({
   imports: [
@@ -16,11 +20,13 @@ import { Person } from './person/entities/person.entity';
       password: process.env.DATABASE_PASSWORD,
       username: process.env.DATABASE_USERNAME,
       database: process.env.DATABASE_NAME,
-      entities: [Person],
+      entities: [Person, Driver, Location],
       synchronize: true,
       logging: true,
     }),
-    PersonModule,],
+    PersonModule,
+    DriversModule,
+    LocationsModule,],
   controllers: [AppController],
   providers: [AppService],
 })
