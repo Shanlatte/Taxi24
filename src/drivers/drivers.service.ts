@@ -1,9 +1,10 @@
 import { Injectable, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { GetDriverDto } from './dto/get-driver.dto';
+import { InjectRepository, } from '@nestjs/typeorm';
 import { Driver } from './entities/driver.entity';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, Repository, EntityManager } from 'typeorm';
 import { Person } from 'src/person/entities/person.entity';
 import { Location } from 'src/locations/entities/location.entity';
 
@@ -14,11 +15,11 @@ export class DriversService {
     @InjectRepository(Driver) private readonly driverRepository: Repository<Driver>,
     @InjectRepository(Person) private readonly personRepository: Repository<Person>,
     @InjectRepository(Location) private readonly locationRepository: Repository<Location>,
+    private readonly entityManager: EntityManager,
   ) { }
 
+  async create(createDriverDto: CreateDriverDto): Promise<GetDriverDto> {
 
-  async create(createDriverDto: CreateDriverDto) {
-    const { name, email, latitude, longitude, available } = createDriverDto;
     const driverFound = await this.personRepository.findOneBy(
       {
         email: createDriverDto.email,
@@ -29,19 +30,29 @@ export class DriversService {
       throw new ConflictException('There is an existing driver with this email');
     }
 
-    try {
-      const person = this.personRepository.create({ name, email });
-      await this.personRepository.save(person)
+    let createdDriverObject: GetDriverDto;
 
-      const location = this.locationRepository.create({ latitude, longitude });
-      await this.locationRepository.save(location)
+    await this.entityManager.transaction(async (entityManager) => {
+      const { name, email, latitude, longitude, available } = createDriverDto;
 
-      const driver = this.driverRepository.create({ person, location, available });
-      return this.driverRepository.save(driver);
+      try {
+        const person = this.personRepository.create({ name, email });
+        await entityManager.save(person);
 
-    } catch (error) {
-      throw new InternalServerErrorException('Error creating driver', error);
-    }
+        const location = this.locationRepository.create({ latitude, longitude });
+        await entityManager.save(location);
+
+        const driver = this.driverRepository.create({ person, location, available });
+        await entityManager.save(driver);
+
+        createdDriverObject = new GetDriverDto(driver.id, person.name, person.email, location.latitude, location.longitude, driver.available);
+
+      } catch (error) {
+        throw new InternalServerErrorException('Error creating driver', error);
+      }
+    })
+
+    return createdDriverObject;
   }
 
   findAll() {
