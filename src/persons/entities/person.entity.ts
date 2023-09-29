@@ -11,3 +11,4 @@ export class Person {
     @Column({ type: 'varchar', length: 40 })
     email: string;
 }
+

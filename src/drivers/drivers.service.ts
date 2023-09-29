@@ -5,7 +5,7 @@ import { GetDriverDto } from './dto/get-driver.dto';
 import { InjectRepository, } from '@nestjs/typeorm';
 import { Driver } from './entities/driver.entity';
 import { FindOptionsWhere, Repository, EntityManager } from 'typeorm';
-import { Person } from 'src/person/entities/person.entity';
+import { Person } from 'src/persons/entities/person.entity';
 import { Location } from 'src/locations/entities/location.entity';
 
 @Injectable()
