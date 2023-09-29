@@ -27,7 +27,7 @@ export class DriversService {
     );
 
     if (driverFound) {
-      throw new ConflictException('There is an existing driver with this email');
+      throw new ConflictException('There is an existing person with this email');
     }
 
     let createdDriverObject: GetDriverDto;

@@ -9,6 +9,8 @@ import { DriversModule } from './drivers/drivers.module';
 import { LocationsModule } from './locations/locations.module';
 import { Driver } from './drivers/entities/driver.entity';
 import { Location } from './locations/entities/location.entity';
+import { PassengersModule } from './passengers/passengers.module';
+import { Passenger } from './passengers/entities/passenger.entity';
 
 @Module({
   imports: [
@@ -20,13 +22,14 @@ import { Location } from './locations/entities/location.entity';
       password: process.env.DATABASE_PASSWORD,
       username: process.env.DATABASE_USERNAME,
       database: process.env.DATABASE_NAME,
-      entities: [Person, Driver, Location],
+      entities: [Person, Driver, Location, Passenger],
       synchronize: true,
       logging: true,
     }),
     PersonsModule,
     DriversModule,
-    LocationsModule,],
+    LocationsModule,
+    PassengersModule,],
   controllers: [AppController],
   providers: [AppService],
 })
