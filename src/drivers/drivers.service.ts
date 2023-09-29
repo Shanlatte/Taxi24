@@ -79,4 +79,15 @@ export class DriversService {
 
     return new GetDriverDto(driver.id, driver.person, driver.location, driver.available);
   }
+
+  async findAllAvailable():Promise<GetDriverDto[]> {
+    const drivers = await this.driverRepository
+      .createQueryBuilder('driver')
+      .leftJoinAndSelect('driver.person', 'person')
+      .leftJoinAndSelect('driver.location', 'location')
+      .where('driver.available = true')
+      .getMany();
+
+    return drivers.map(driver => new GetDriverDto(driver.id, driver.person, driver.location, driver.available))
+  }
 }

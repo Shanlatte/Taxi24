@@ -17,6 +17,11 @@ export class DriversController {
     return this.driversService.findAll();
   }
 
+  @Get('available')
+  findAllAvailable() {
+    return this.driversService.findAllAvailable();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.driversService.findOne(+id);
