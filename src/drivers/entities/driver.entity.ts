@@ -1,6 +1,6 @@
 import { Location } from 'src/locations/entities/location.entity';
 import { Person } from 'src/persons/entities/person.entity';
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity()
 export class Driver {
@@ -11,9 +11,9 @@ export class Driver {
     @JoinColumn()
     person: Person;
 
-    @ManyToOne(() => Location, location => location.id, { onDelete: 'SET NULL' })
+    @OneToOne(() => Location, location => location.id, { onDelete: 'SET NULL' })
     @JoinColumn()
-    location: Person;
+    location: Location;
 
     @Column()
     available: boolean
