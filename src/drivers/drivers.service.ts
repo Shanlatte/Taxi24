@@ -1,6 +1,5 @@
-import { Injectable, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, ConflictException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateDriverDto } from './dto/create-driver.dto';
-import { UpdateDriverDto } from './dto/update-driver.dto';
 import { GetDriverDto } from './dto/get-driver.dto';
 import { InjectRepository, } from '@nestjs/typeorm';
 import { Driver } from './entities/driver.entity';
@@ -45,7 +44,7 @@ export class DriversService {
         const driver = this.driverRepository.create({ person, location, available });
         await entityManager.save(driver);
 
-        createdDriverObject = new GetDriverDto(driver.id, person.name, person.email, location.latitude, location.longitude, driver.available);
+        createdDriverObject = new GetDriverDto(driver.id, person, location, driver.available);
 
       } catch (error) {
         throw new InternalServerErrorException('Error creating driver', error);
@@ -55,19 +54,29 @@ export class DriversService {
     return createdDriverObject;
   }
 
-  findAll() {
-    return `This action returns all drivers`;
+  async findAll(): Promise<GetDriverDto[]> {
+    const drivers = await this.driverRepository
+      .createQueryBuilder('driver')
+      .leftJoinAndSelect('driver.person', 'person')
+      .leftJoinAndSelect('driver.location', 'location')
+      .getMany();
+
+    return drivers.map(driver => new GetDriverDto(driver.id, driver.person, driver.location, driver.available))
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} driver`;
-  }
+  async findOne(id: number): Promise<GetDriverDto> {
 
-  update(id: number, updateDriverDto: UpdateDriverDto) {
-    return `This action updates a #${id} driver`;
-  }
+    const driver = await this.driverRepository
+      .createQueryBuilder('driver')
+      .leftJoinAndSelect('driver.person', 'person')
+      .leftJoinAndSelect('driver.location', 'location')
+      .where('driver.id = :id', { id })
+      .getOne();
 
-  remove(id: number) {
-    return `This action removes a #${id} driver`;
+    if (!driver) {
+      throw new NotFoundException('No driver was found with this id');
+    }
+
+    return new GetDriverDto(driver.id, driver.person, driver.location, driver.available);
   }
 }
