@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { GetDriverDto } from './dto/get-driver.dto';
 import { InjectRepository, } from '@nestjs/typeorm';
@@ -6,6 +6,7 @@ import { Driver } from './entities/driver.entity';
 import { FindOptionsWhere, Repository, EntityManager } from 'typeorm';
 import { Person } from 'src/persons/entities/person.entity';
 import { Location } from 'src/locations/entities/location.entity';
+import { calculateDistanceBetweenLocations } from 'src/locations/helpers/locationsDistanceHelper';
 
 @Injectable()
 export class DriversService {
@@ -35,13 +36,13 @@ export class DriversService {
       const { name, email, latitude, longitude, available } = createDriverDto;
 
       try {
-        const person = this.personRepository.create({ name, email });
+        const person: Person = this.personRepository.create({ name, email });
         await entityManager.save(person);
 
-        const location = this.locationRepository.create({ latitude, longitude });
+        const location: Location = this.locationRepository.create({ latitude, longitude });
         await entityManager.save(location);
 
-        const driver = this.driverRepository.create({ person, location, available });
+        const driver: Driver = this.driverRepository.create({ person, location, available });
         await entityManager.save(driver);
 
         createdDriverObject = new GetDriverDto(driver.id, person, location, driver.available);
@@ -55,7 +56,7 @@ export class DriversService {
   }
 
   async findAll(): Promise<GetDriverDto[]> {
-    const drivers = await this.driverRepository
+    const drivers: Driver[] = await this.driverRepository
       .createQueryBuilder('driver')
       .leftJoinAndSelect('driver.person', 'person')
       .leftJoinAndSelect('driver.location', 'location')
@@ -66,7 +67,7 @@ export class DriversService {
 
   async findOne(id: number): Promise<GetDriverDto> {
 
-    const driver = await this.driverRepository
+    const driver: Driver = await this.driverRepository
       .createQueryBuilder('driver')
       .leftJoinAndSelect('driver.person', 'person')
       .leftJoinAndSelect('driver.location', 'location')
@@ -80,8 +81,8 @@ export class DriversService {
     return new GetDriverDto(driver.id, driver.person, driver.location, driver.available);
   }
 
-  async findAllAvailable():Promise<GetDriverDto[]> {
-    const drivers = await this.driverRepository
+  async findAllAvailable(): Promise<GetDriverDto[]> {
+    const drivers: Driver[] = await this.driverRepository
       .createQueryBuilder('driver')
       .leftJoinAndSelect('driver.person', 'person')
       .leftJoinAndSelect('driver.location', 'location')
@@ -89,5 +90,32 @@ export class DriversService {
       .getMany();
 
     return drivers.map(driver => new GetDriverDto(driver.id, driver.person, driver.location, driver.available))
+  }
+
+  async findAllAvailableIn3km(latitude: string, longitude: string): Promise<GetDriverDto[]> {
+    const availableDrivers: GetDriverDto[] = await this.findAllAvailable();
+    const nearAvailableDrivers: GetDriverDto[] = [];
+
+    const parsedLatitude: number = parseFloat(latitude);
+    const parsedLongitude: number = parseFloat(longitude);
+
+    if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
+      throw new BadRequestException('Invalid latitude or longitude format');
+    }
+
+    availableDrivers.forEach((driver: GetDriverDto) => {
+      const distance: number = calculateDistanceBetweenLocations(
+        parsedLatitude,
+        parsedLongitude,
+        +driver.latitude,
+        +driver.longitude,
+      );
+
+      if (distance <= 3.0 && distance >= 0) {
+        nearAvailableDrivers.push(driver);
+      }
+    });
+
+    return nearAvailableDrivers;
   }
 }
