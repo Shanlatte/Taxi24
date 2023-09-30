@@ -65,7 +65,7 @@ export class PassengersService {
       .getOne();
 
     if (!passenger) {
-      throw new NotFoundException('No passenger was found with this id');
+      throw new NotFoundException('No passenger was found with this ID');
     }
 
     return new GetPassengerDto(passenger.id, passenger.person.name, passenger.person.email);

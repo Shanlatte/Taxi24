@@ -18,7 +18,7 @@ export class InvoicesService {
     const invoiceFound = await this.invoiceRepository.findOneBy({ id });
 
     if (!invoiceFound) {
-      throw new NotFoundException('No invoice found with this id');
+      throw new NotFoundException('No invoice found with this ID');
     }
 
     return invoiceFound;

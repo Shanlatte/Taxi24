@@ -75,7 +75,7 @@ export class DriversService {
       .getOne();
 
     if (!driver) {
-      throw new NotFoundException('No driver was found with this id');
+      throw new NotFoundException('No driver was found with this ID');
     }
 
     return new GetDriverDto(driver.id, driver.person, driver.location, driver.available);

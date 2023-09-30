@@ -30,7 +30,7 @@ export class RidesService {
       .getOne();
 
     if (!driver) {
-      throw new NotFoundException('No driver was found with this id');
+      throw new NotFoundException('No driver was found with this ID');
     }
 
     const passenger = await this.passengerRepository
@@ -40,7 +40,7 @@ export class RidesService {
       .getOne();
 
     if (!passenger) {
-      throw new NotFoundException('No passenger was found with this id');
+      throw new NotFoundException('No passenger was found with this ID');
     }
 
     let createdRideObject: GetRideDto;
@@ -112,7 +112,7 @@ export class RidesService {
       .getOne();
 
     if (!rideFound) {
-      throw new NotFoundException('No ride was found with this id');
+      throw new NotFoundException('No ride was found with this ID');
     }
 
     if (rideFound.status !== 'active') {
