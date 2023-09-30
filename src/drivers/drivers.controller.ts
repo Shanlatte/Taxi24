@@ -32,7 +32,7 @@ export class DriversController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.driversService.findOne(+id);
+  findOneById(@Param('id') id: string) {
+    return this.driversService.findOneById(+id);
   }
 }

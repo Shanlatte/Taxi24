@@ -53,7 +53,7 @@ export class PassengersService {
     return passengers.map(passenger => new GetPassengerDto(passenger.id, passenger.person.name, passenger.person.email))
   }
 
-  async findOne(id: number): Promise<GetPassengerDto> {
+  async findOneById(id: number): Promise<GetPassengerDto> {
     const passenger: Passenger = await this.passengerRepository
       .createQueryBuilder('passenger')
       .leftJoinAndSelect('passenger.person', 'person')

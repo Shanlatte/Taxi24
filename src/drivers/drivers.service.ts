@@ -62,7 +62,7 @@ export class DriversService {
     return drivers.map(driver => new GetDriverDto(driver.id, driver.person, driver.location, driver.available))
   }
 
-  async findOne(id: number): Promise<GetDriverDto> {
+  async findOneById(id: number): Promise<GetDriverDto> {
 
     const driver: Driver = await this.driverRepository
       .createQueryBuilder('driver')

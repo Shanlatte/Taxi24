@@ -13,7 +13,7 @@ export class InvoicesService {
     return await this.invoiceRepository.find();
   }
 
-  async findOne(id: number): Promise<Invoice> {
+  async findOneById(id: number): Promise<Invoice> {
     try {
       return await this.invoiceRepository.findOneByOrFail({ id });
     } catch (error) {

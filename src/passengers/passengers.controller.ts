@@ -17,8 +17,8 @@ export class PassengersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.passengersService.findOne(+id);
+  findOneById(@Param('id') id: string) {
+    return this.passengersService.findOneById(+id);
   }
 
 }
