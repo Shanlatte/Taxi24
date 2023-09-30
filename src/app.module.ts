@@ -13,6 +13,8 @@ import { PassengersModule } from './passengers/passengers.module';
 import { Passenger } from './passengers/entities/passenger.entity';
 import { RidesModule } from './rides/rides.module';
 import { Ride } from './rides/entities/ride.entity';
+import { InvoicesModule } from './invoices/invoices.module';
+import { Invoice } from './invoices/entities/invoice.entity';
 
 @Module({
   imports: [
@@ -24,7 +26,7 @@ import { Ride } from './rides/entities/ride.entity';
       password: process.env.DATABASE_PASSWORD,
       username: process.env.DATABASE_USERNAME,
       database: process.env.DATABASE_NAME,
-      entities: [Person, Driver, Location, Passenger, Ride],
+      entities: [Person, Driver, Location, Passenger, Ride, Invoice],
       synchronize: true,
       logging: true,
     }),
@@ -32,7 +34,8 @@ import { Ride } from './rides/entities/ride.entity';
     DriversModule,
     LocationsModule,
     PassengersModule,
-    RidesModule,],
+    RidesModule,
+    InvoicesModule,],
   controllers: [AppController],
   providers: [AppService],
 })
