@@ -14,13 +14,10 @@ export class InvoicesService {
   }
 
   async findOne(id: number): Promise<Invoice> {
-
-    const invoiceFound = await this.invoiceRepository.findOneBy({ id });
-
-    if (!invoiceFound) {
-      throw new NotFoundException('No invoice found with this ID');
+    try {
+      return await this.invoiceRepository.findOneByOrFail({ id });
+    } catch (error) {
+      throw new NotFoundException('No invoice found with this ID')
     }
-
-    return invoiceFound;
   }
 }

@@ -1,12 +1,19 @@
-export function convertDegreesToRadian(degrees: number): number {
+function convertDegreesToRadian(degrees: number): number {
     return (degrees / 180) * Math.PI;
 }
 
-export function calculateDistanceBetweenLocations(rawLatitude1: number = 0, rawLongitude1: number = 0, rawLatitude2: number = 0, rawLongitude2: number = 0): number {
-    const latitude1: number = convertDegreesToRadian(rawLatitude1);
-    const latitude2: number = convertDegreesToRadian(rawLatitude2);
-    const longitude1: number = convertDegreesToRadian(rawLongitude1);
-    const longitude2: number = convertDegreesToRadian(rawLongitude2);
+// Function used to calculate distance between locations, the formula used is "Haversine", which calculates the 
+// shortest distance between two points on a sphere using their latitudes and longitudes measured along the surface.
+export function calculateDistanceBetweenLocations(
+    degreesLatitude1: number = 0,
+    degreesLongitude1: number = 0,
+    degreesLatitude2: number = 0,
+    degreesLongitude2: number = 0): number {
+
+    const latitude1: number = convertDegreesToRadian(degreesLatitude1);
+    const latitude2: number = convertDegreesToRadian(degreesLatitude2);
+    const longitude1: number = convertDegreesToRadian(degreesLongitude1);
+    const longitude2: number = convertDegreesToRadian(degreesLongitude2);
 
     const earthRadiusInKm: number = 6371.0088;
 
@@ -23,5 +30,5 @@ export function calculateDistanceBetweenLocations(rawLatitude1: number = 0, rawL
     );
 
     const distance: number = 2 * earthRadiusInKm * Math.asin(sqrtResult);
-    return parseFloat(distance.toFixed(2));
+    return parseFloat(distance.toFixed(6));
 };
