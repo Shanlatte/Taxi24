@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateRideDto } from './dto/create-ride.dto';
 import { Driver } from 'src/drivers/entities/driver.entity';
 import { Location } from 'src/locations/entities/location.entity';
@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Passenger } from 'src/passengers/entities/passenger.entity';
 import { Ride } from './entities/ride.entity';
 import { GetRideDto } from './dto/get-ride.dto';
+import { Invoice } from 'src/invoices/entities/invoice.entity';
 
 @Injectable()
 export class RidesService {
@@ -16,6 +17,7 @@ export class RidesService {
     @InjectRepository(Driver) private readonly driverRepository: Repository<Driver>,
     @InjectRepository(Passenger) private readonly passengerRepository: Repository<Passenger>,
     @InjectRepository(Location) private readonly locationRepository: Repository<Location>,
+    @InjectRepository(Invoice) private readonly invoiceRepository: Repository<Invoice>,
     private readonly entityManager: EntityManager,
   ) { }
 
@@ -105,6 +107,7 @@ export class RidesService {
     const rideFound: Ride = await this.rideRepository
       .createQueryBuilder('ride')
       .leftJoinAndSelect('ride.driver', 'driver')
+      .leftJoinAndSelect('ride.passenger', 'passenger')
       .where('ride.id = :id', { id })
       .getOne();
 
@@ -112,12 +115,27 @@ export class RidesService {
       throw new NotFoundException('No ride was found with this id');
     }
 
+    if (rideFound.status !== 'active') {
+      throw new BadRequestException(`Ride with ID ${id} is ${rideFound.status}, a ride with 'active' status is expected`);
+    }
+
     await this.entityManager.transaction(async (entityManager) => {
       try {
         // Set driver available again
         await entityManager.update(Driver, { id: rideFound.driver.id }, { available: true });
 
-        return await entityManager.update(Ride, id, { status: 'finished' })
+        // Update ride status to 'finished'
+        await entityManager.update(Ride, id, { status: 'finished' })
+
+        // Create ride's invoice
+        const { driver, passenger } = rideFound;
+        const date = new Date();
+        const amount = parseFloat((Math.random() * (100)).toFixed(2)); // Generate random amount to have different data in the DB
+
+        const invoice = this.invoiceRepository.create({ driver, passenger, date, amount });
+        await entityManager.save(invoice);
+
+        return invoice;
       } catch (error) {
         throw new InternalServerErrorException("Error completing ride")
       }
