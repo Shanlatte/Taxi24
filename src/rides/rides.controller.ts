@@ -5,7 +5,7 @@ import { UpdateRideDto } from './dto/update-ride.dto';
 
 @Controller('rides')
 export class RidesController {
-  constructor(private readonly ridesService: RidesService) {}
+  constructor(private readonly ridesService: RidesService) { }
 
   @Post()
   create(@Body() createRideDto: CreateRideDto) {
@@ -17,18 +17,13 @@ export class RidesController {
     return this.ridesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ridesService.findOne(+id);
+  @Get('active')
+  findAllActive() {
+    return this.ridesService.findAllActive();
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRideDto: UpdateRideDto) {
-    return this.ridesService.update(+id, updateRideDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ridesService.remove(+id);
+  @Patch('complete/:id')
+  completeRide(@Param('id') id: string) {
+    return this.ridesService.completeRide(+id);
   }
 }

@@ -1,9 +1,8 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateRideDto } from './dto/create-ride.dto';
-import { UpdateRideDto } from './dto/update-ride.dto';
 import { Driver } from 'src/drivers/entities/driver.entity';
 import { Location } from 'src/locations/entities/location.entity';
-import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Passenger } from 'src/passengers/entities/passenger.entity';
 import { Ride } from './entities/ride.entity';
@@ -48,6 +47,9 @@ export class RidesService {
       const { startLatitude, startLongitude, endLatitude, endLongitude } = createRideDto;
 
       try {
+        //Update driver availability to false
+        await this.driverRepository.update(driver.id, { available: false })
+
         const startLocation = this.locationRepository.create({ latitude: startLatitude, longitude: startLongitude });
         await entityManager.save(startLocation);
 
@@ -67,19 +69,58 @@ export class RidesService {
     return createdRideObject;
   }
 
-  findAll() {
-    return `This action returns all rides`;
+  async findAll(): Promise<GetRideDto[]> {
+    const rides: Ride[] = await this.rideRepository
+      .createQueryBuilder('ride')
+      .leftJoinAndSelect('ride.passenger', 'passenger')
+      .leftJoinAndSelect('passenger.person', 'personP')
+      .leftJoinAndSelect('ride.driver', 'driver')
+      .leftJoinAndSelect('driver.person', 'personD')
+      .leftJoinAndSelect('ride.startLocation', 'startLocation')
+      .leftJoinAndSelect('ride.endLocation', 'endLocation')
+      .getMany();
+
+    return rides.map(ride => new GetRideDto(ride.id, ride.passenger.id, ride.passenger.person.name, ride.driver.id, ride.driver.person.name,
+      ride.startLocation.latitude, ride.startLocation.longitude, ride.endLocation.latitude, ride.endLocation.longitude, ride.status))
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} ride`;
+  async findAllActive(): Promise<GetRideDto[]> {
+    const rides: Ride[] = await this.rideRepository
+      .createQueryBuilder('ride')
+      .leftJoinAndSelect('ride.passenger', 'passenger')
+      .leftJoinAndSelect('passenger.person', 'personP')
+      .leftJoinAndSelect('ride.driver', 'driver')
+      .leftJoinAndSelect('driver.person', 'personD')
+      .leftJoinAndSelect('ride.startLocation', 'startLocation')
+      .leftJoinAndSelect('ride.endLocation', 'endLocation')
+      .where("ride.status = 'active'")
+      .getMany();
+
+    return rides.map(ride => new GetRideDto(ride.id, ride.passenger.id, ride.passenger.person.name, ride.driver.id, ride.driver.person.name,
+      ride.startLocation.latitude, ride.startLocation.longitude, ride.endLocation.latitude, ride.endLocation.longitude, ride.status))
   }
 
-  update(id: number, updateRideDto: UpdateRideDto) {
-    return `This action updates a #${id} ride`;
-  }
+  async completeRide(id: number) {
+    //Check if the ride exists
+    const rideFound: Ride = await this.rideRepository
+      .createQueryBuilder('ride')
+      .leftJoinAndSelect('ride.driver', 'driver')
+      .where('ride.id = :id', { id })
+      .getOne();
 
-  remove(id: number) {
-    return `This action removes a #${id} ride`;
+    if (!rideFound) {
+      throw new NotFoundException('No ride was found with this id');
+    }
+
+    await this.entityManager.transaction(async (entityManager) => {
+      try {
+        // Set driver available again
+        await entityManager.update(Driver, { id: rideFound.driver.id }, { available: true });
+
+        return await entityManager.update(Ride, id, { status: 'finished' })
+      } catch (error) {
+        throw new InternalServerErrorException("Error completing ride")
+      }
+    })
   }
 }
