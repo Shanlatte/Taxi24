@@ -2,7 +2,7 @@ import { ConflictException, Injectable, InternalServerErrorException, NotFoundEx
 import { CreatePassengerDto } from './dto/create-passenger.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Person } from 'src/persons/entities/person.entity';
-import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { GetPassengerDto } from './dto/get-passenger.dto';
 import { Passenger } from './entities/passenger.entity';
 
@@ -16,11 +16,7 @@ export class PassengersService {
   ) { }
 
   async create(createPassengerDto: CreatePassengerDto): Promise<GetPassengerDto> {
-    const passengerFound = await this.personRepository.findOneBy(
-      {
-        email: createPassengerDto.email,
-      } as FindOptionsWhere<Person>,
-    );
+    const passengerFound = await this.personRepository.findOne({ where: { email: createPassengerDto.email } });
 
     if (passengerFound) {
       throw new ConflictException('There is an existing person with this email');
@@ -39,7 +35,6 @@ export class PassengersService {
         await entityManager.save(passenger);
 
         createdPassengerObject = new GetPassengerDto(passenger.id, person.name, person.email);
-
       } catch (error) {
         throw new InternalServerErrorException('Error creating passenger', error);
       }

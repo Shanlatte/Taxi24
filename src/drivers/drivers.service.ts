@@ -3,7 +3,7 @@ import { CreateDriverDto } from './dto/create-driver.dto';
 import { GetDriverDto } from './dto/get-driver.dto';
 import { InjectRepository, } from '@nestjs/typeorm';
 import { Driver } from './entities/driver.entity';
-import { FindOptionsWhere, Repository, EntityManager } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { Person } from 'src/persons/entities/person.entity';
 import { Location } from 'src/locations/entities/location.entity';
 import { calculateDistanceBetweenLocations } from 'src/locations/helpers/locationsDistanceHelper';
@@ -20,11 +20,7 @@ export class DriversService {
 
   async create(createDriverDto: CreateDriverDto): Promise<GetDriverDto> {
 
-    const driverFound = await this.personRepository.findOneBy(
-      {
-        email: createDriverDto.email,
-      } as FindOptionsWhere<Person>,
-    );
+    const driverFound = await this.personRepository.findOne({ where: { email: createDriverDto.email } });
 
     if (driverFound) {
       throw new ConflictException('There is an existing person with this email');
