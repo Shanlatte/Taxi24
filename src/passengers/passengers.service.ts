@@ -18,6 +18,7 @@ export class PassengersService {
   async create(createPassengerDto: CreatePassengerDto): Promise<GetPassengerDto> {
     const passengerFound = await this.personRepository.findOne({ where: { email: createPassengerDto.email } });
 
+    //Check if there is another person with this email
     if (passengerFound) {
       throw new ConflictException('There is an existing person with this email');
     }

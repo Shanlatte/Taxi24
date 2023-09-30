@@ -22,6 +22,7 @@ export class DriversService {
 
     const driverFound = await this.personRepository.findOne({ where: { email: createDriverDto.email } });
 
+    //Check if there is another person with this email
     if (driverFound) {
       throw new ConflictException('There is an existing person with this email');
     }

@@ -61,8 +61,7 @@ export class RidesService {
         const ride = this.rideRepository.create({ driver, passenger, startLocation, endLocation, status: 'active' });
         await entityManager.save(ride);
 
-        createdRideObject = new GetRideDto(ride.id, passenger.id, passenger.person.name, driver.id, driver.person.name,
-          startLocation.latitude, startLocation.longitude, endLocation.latitude, endLocation.longitude, ride.status)
+        createdRideObject = new GetRideDto(ride.id, passenger, driver, startLocation, endLocation, ride.status)
       } catch (error) {
         throw new InternalServerErrorException(error);
       }
@@ -82,8 +81,7 @@ export class RidesService {
       .leftJoinAndSelect('ride.endLocation', 'endLocation')
       .getMany();
 
-    return rides.map(ride => new GetRideDto(ride.id, ride.passenger.id, ride.passenger.person.name, ride.driver.id, ride.driver.person.name,
-      ride.startLocation.latitude, ride.startLocation.longitude, ride.endLocation.latitude, ride.endLocation.longitude, ride.status))
+    return rides.map(ride => new GetRideDto(ride.id, ride.passenger, ride.driver, ride.startLocation, ride.endLocation, ride.status));
   }
 
   async findAllActive(): Promise<GetRideDto[]> {
@@ -98,8 +96,7 @@ export class RidesService {
       .where("ride.status = 'active'")
       .getMany();
 
-    return rides.map(ride => new GetRideDto(ride.id, ride.passenger.id, ride.passenger.person.name, ride.driver.id, ride.driver.person.name,
-      ride.startLocation.latitude, ride.startLocation.longitude, ride.endLocation.latitude, ride.endLocation.longitude, ride.status))
+    return rides.map(ride => new GetRideDto(ride.id, ride.passenger, ride.driver, ride.startLocation, ride.endLocation, ride.status));
   }
 
   async completeRide(id: number) {
