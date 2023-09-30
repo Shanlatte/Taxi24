@@ -116,6 +116,46 @@ export class DriversService {
       }
     });
 
+    if (!nearAvailableDrivers.length) {
+      throw new NotFoundException('No drivers found');
+    }
+
     return nearAvailableDrivers;
+  }
+
+  async find3NearestDrivers(latitude: string, longitude: string): Promise<GetDriverDto[]> {
+    const availableDrivers: GetDriverDto[] = await this.findAllAvailable();
+
+    if (!availableDrivers.length) {
+      throw new NotFoundException('No drivers found');
+    }
+
+    const parsedLatitude: number = parseFloat(latitude);
+    const parsedLongitude: number = parseFloat(longitude);
+
+    if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
+      throw new BadRequestException('Invalid latitude or longitude format');
+    }
+
+    const distanceDriversMap: Map<number, GetDriverDto> = new Map();
+    let sortedDrivers: GetDriverDto[] = [];
+
+    availableDrivers.forEach(driver => {
+      const distance: number = calculateDistanceBetweenLocations(
+        parsedLatitude,
+        parsedLongitude,
+        +driver.latitude,
+        +driver.longitude,
+      );
+
+      distanceDriversMap.set(distance, driver);
+    })
+
+    const sortedKeys = Array.from(distanceDriversMap.keys()).sort();
+    for (const key of sortedKeys) {
+      sortedDrivers.push(distanceDriversMap.get(key));
+    }
+
+    return sortedDrivers.slice(0, 3);
   }
 }

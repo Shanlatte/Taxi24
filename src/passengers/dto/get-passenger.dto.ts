@@ -1,5 +1,5 @@
 export class GetPassengerDto {
-    constructor(id, name, email) {
+    constructor(id: number, name: string, email: string) {
         this.id = id;
         this.name = name;
         this.email = email;

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreatePassengerDto } from './dto/create-passenger.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Person } from 'src/persons/entities/person.entity';
@@ -15,7 +15,7 @@ export class PassengersService {
     private readonly entityManager: EntityManager,
   ) { }
 
-  async create(createPassengerDto: CreatePassengerDto) :Promise<GetPassengerDto> {
+  async create(createPassengerDto: CreatePassengerDto): Promise<GetPassengerDto> {
     const passengerFound = await this.personRepository.findOneBy(
       {
         email: createPassengerDto.email,
@@ -29,7 +29,7 @@ export class PassengersService {
     let createdPassengerObject: GetPassengerDto;
 
     await this.entityManager.transaction(async (entityManager) => {
-      const { name, email} = createPassengerDto;
+      const { name, email } = createPassengerDto;
 
       try {
         const person = this.personRepository.create({ name, email });
@@ -48,15 +48,26 @@ export class PassengersService {
     return createdPassengerObject;
   }
 
-  findAll() {
-    return `This action returns all passengers`;
+  async findAll(): Promise<GetPassengerDto[]> {
+    const passengers: Passenger[] = await this.passengerRepository
+      .createQueryBuilder('passenger')
+      .leftJoinAndSelect('passenger.person', 'person')
+      .getMany();
+
+    return passengers.map(passenger => new GetPassengerDto(passenger.id, passenger.person.name, passenger.person.email))
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} passenger`;
-  }
+  async findOne(id: number): Promise<GetPassengerDto> {
+    const passenger: Passenger = await this.passengerRepository
+      .createQueryBuilder('passenger')
+      .leftJoinAndSelect('passenger.person', 'person')
+      .where('passenger.id = :id', { id })
+      .getOne();
 
-  remove(id: number) {
-    return `This action removes a #${id} passenger`;
+    if (!passenger) {
+      throw new NotFoundException('No passenger was found with this id');
+    }
+
+    return new GetPassengerDto(passenger.id, passenger.person.name, passenger.person.email);
   }
 }

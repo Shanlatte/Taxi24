@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { PassengersService } from './passengers.service';
 import { CreatePassengerDto } from './dto/create-passenger.dto';
 
 @Controller('passengers')
 export class PassengersController {
-  constructor(private readonly passengersService: PassengersService) {}
+  constructor(private readonly passengersService: PassengersService) { }
 
   @Post()
   create(@Body() createPassengerDto: CreatePassengerDto) {
@@ -21,8 +21,4 @@ export class PassengersController {
     return this.passengersService.findOne(+id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.passengersService.remove(+id);
-  }
 }

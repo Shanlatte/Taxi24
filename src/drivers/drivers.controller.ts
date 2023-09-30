@@ -26,6 +26,11 @@ export class DriversController {
     return this.driversService.findAllAvailableIn3km(latitude, longitude);
   }
 
+  @Get('find3NearestDrivers/:latitude/:longitude')
+  find3NearestDrivers(@Param('latitude') latitude: string, @Param('longitude') longitude: string) {
+    return this.driversService.find3NearestDrivers(latitude, longitude);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.driversService.findOne(+id);
