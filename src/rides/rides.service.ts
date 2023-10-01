@@ -147,4 +147,27 @@ export class RidesService {
       }
     })
   }
+
+  async findOneById(id: number) {
+    try {
+      const ride: Ride = await this.rideRepository
+        .createQueryBuilder('ride')
+        .leftJoinAndSelect('ride.passenger', 'passenger')
+        .leftJoinAndSelect('passenger.person', 'personP')
+        .leftJoinAndSelect('ride.driver', 'driver')
+        .leftJoinAndSelect('driver.person', 'personD')
+        .leftJoinAndSelect('ride.startLocation', 'startLocation')
+        .leftJoinAndSelect('ride.endLocation', 'endLocation')
+        .where('ride.id = :id', { id })
+        .getOne();
+
+      if (!ride) {
+        throw new NotFoundException('No passenger was found with this ID');
+      }
+
+      return new GetRideDto(ride.id, ride.passenger, ride.driver, ride.startLocation, ride.endLocation, ride.status);
+    } catch (error) {
+      throw new InternalServerErrorException('Error retrieving ride')
+    }
+  }
 }

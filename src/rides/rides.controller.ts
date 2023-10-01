@@ -26,4 +26,9 @@ export class RidesController {
   completeRide(@Param('id') id: string) {
     return this.ridesService.completeRide(+id);
   }
+
+  @Get(':id')
+  findOneById(@Param('id') id: string) {
+    return this.ridesService.findOneById(+id);
+  }
 }
