@@ -17,5 +17,5 @@ export default new DataSource({
   logging: false,
   migrationsTableName: 'migrations',
   entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
-  migrations: [`${__dirname}/../migrations/*{.ts,.js}`],
+  migrations: [`${__dirname}/../db/migrations/*{.ts,.js}`],
 });
