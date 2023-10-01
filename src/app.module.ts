@@ -10,6 +10,7 @@ import { RidesModule } from './rides/rides.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppConfig, DatabaseConfig } from './config';
+import { SeederModule } from './db/seeders/seeder.module';
 
 @Module({
   imports: [
@@ -30,7 +31,8 @@ import { AppConfig, DatabaseConfig } from './config';
     LocationsModule,
     PassengersModule,
     RidesModule,
-    InvoicesModule,],
+    InvoicesModule,
+    SeederModule],
   controllers: [AppController],
   providers: [AppService],
 })

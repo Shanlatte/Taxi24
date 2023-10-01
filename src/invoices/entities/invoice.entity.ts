@@ -1,19 +1,14 @@
-import { Driver } from 'src/drivers/entities/driver.entity';
-import { Passenger } from 'src/passengers/entities/passenger.entity';
-import { Column, Entity, PrimaryGeneratedColumn, JoinColumn, ManyToOne } from 'typeorm';
+import { Ride } from 'src/rides/entities/ride.entity';
+import { Column, Entity, PrimaryGeneratedColumn, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity()
 export class Invoice {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => Passenger, passenger => passenger.id, { onDelete: 'SET NULL' })
+    @OneToOne(() => Ride, ride => ride.id, { onDelete: 'SET NULL' })
     @JoinColumn()
-    passenger: Passenger;
-
-    @ManyToOne(() => Driver, driver => driver.id, { onDelete: 'SET NULL' })
-    @JoinColumn()
-    driver: Driver;
+    ride: Ride;
 
     @Column('decimal')
     amount: number;

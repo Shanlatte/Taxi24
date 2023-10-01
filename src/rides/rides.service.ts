@@ -125,11 +125,10 @@ export class RidesService {
         await entityManager.update(Ride, id, { status: 'finished' })
 
         // Create ride's invoice
-        const { driver, passenger } = rideFound;
         const date = new Date();
         const amount = parseFloat((Math.random() * (100)).toFixed(2)); // Generate random amount to have different data in the DB
 
-        const invoice = this.invoiceRepository.create({ driver, passenger, date, amount });
+        const invoice = this.invoiceRepository.create({ ride: rideFound, date, amount });
         await entityManager.save(invoice);
 
         return invoice;
