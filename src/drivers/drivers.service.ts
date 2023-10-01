@@ -6,7 +6,7 @@ import { Driver } from './entities/driver.entity';
 import { Repository, EntityManager } from 'typeorm';
 import { Person } from 'src/persons/entities/person.entity';
 import { Location } from 'src/locations/entities/location.entity';
-import { calculateDistanceBetweenLocations } from 'src/locations/helpers/locationsDistanceHelper';
+import { calculateDistanceBetweenLocations } from 'src/utils/locationsDistanceUtil';
 
 @Injectable()
 export class DriversService {
