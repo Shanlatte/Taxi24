@@ -26,12 +26,14 @@ export class SeederService {
   ) { }
 
   async seedData() {
+    console.log('Start seeding data!')
     await this.seedPersonsData();
     await this.seedLocationsData();
     await this.seedDriversData();
     await this.seedPassengersData();
     await this.seedRidesData();
     await this.seedInvoicesData();
+    console.log('All data seeded!')
   }
 
   async seedPersonsData() {

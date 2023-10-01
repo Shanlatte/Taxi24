@@ -33,6 +33,10 @@ export class RidesService {
       throw new NotFoundException('No driver was found with this ID');
     }
 
+    if (!driver.available) {
+      throw new BadRequestException('The driver with this ID is not available');
+    }
+
     const passenger = await this.passengerRepository
       .createQueryBuilder('passenger')
       .leftJoinAndSelect('passenger.person', 'person')
@@ -41,6 +45,12 @@ export class RidesService {
 
     if (!passenger) {
       throw new NotFoundException('No passenger was found with this ID');
+    }
+
+    const activePassengerRide = await this.rideRepository.findOneBy({ passenger, status: 'active' })
+
+    if (activePassengerRide) {
+      throw new BadRequestException('The passenger with this ID is currently on a ride');
     }
 
     let createdRideObject: GetRideDto;
