@@ -162,7 +162,7 @@ export class RidesService {
         .getOne();
 
       if (!ride) {
-        throw new NotFoundException('No passenger was found with this ID');
+        throw new NotFoundException('No ride was found with this ID');
       }
 
       return new GetRideDto(ride.id, ride.passenger, ride.driver, ride.startLocation, ride.endLocation, ride.status);
