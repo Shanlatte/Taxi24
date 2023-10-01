@@ -1,8 +1,8 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreatePassengerDto } from './dto/create-passenger.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Person } from 'src/persons/entities/person.entity';
-import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { GetPassengerDto } from './dto/get-passenger.dto';
 import { Passenger } from './entities/passenger.entity';
 
@@ -15,13 +15,10 @@ export class PassengersService {
     private readonly entityManager: EntityManager,
   ) { }
 
-  async create(createPassengerDto: CreatePassengerDto) :Promise<GetPassengerDto> {
-    const passengerFound = await this.personRepository.findOneBy(
-      {
-        email: createPassengerDto.email,
-      } as FindOptionsWhere<Person>,
-    );
+  async create(createPassengerDto: CreatePassengerDto): Promise<GetPassengerDto> {
+    const passengerFound = await this.personRepository.findOne({ where: { email: createPassengerDto.email } });
 
+    //Check if there is another person with this email
     if (passengerFound) {
       throw new ConflictException('There is an existing person with this email');
     }
@@ -29,7 +26,7 @@ export class PassengersService {
     let createdPassengerObject: GetPassengerDto;
 
     await this.entityManager.transaction(async (entityManager) => {
-      const { name, email} = createPassengerDto;
+      const { name, email } = createPassengerDto;
 
       try {
         const person = this.personRepository.create({ name, email });
@@ -39,7 +36,6 @@ export class PassengersService {
         await entityManager.save(passenger);
 
         createdPassengerObject = new GetPassengerDto(passenger.id, person.name, person.email);
-
       } catch (error) {
         throw new InternalServerErrorException('Error creating passenger', error);
       }
@@ -48,15 +44,26 @@ export class PassengersService {
     return createdPassengerObject;
   }
 
-  findAll() {
-    return `This action returns all passengers`;
+  async findAll(): Promise<GetPassengerDto[]> {
+    const passengers: Passenger[] = await this.passengerRepository
+      .createQueryBuilder('passenger')
+      .leftJoinAndSelect('passenger.person', 'person')
+      .getMany();
+
+    return passengers.map(passenger => new GetPassengerDto(passenger.id, passenger.person.name, passenger.person.email))
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} passenger`;
-  }
+  async findOneById(id: number): Promise<GetPassengerDto> {
+    const passenger: Passenger = await this.passengerRepository
+      .createQueryBuilder('passenger')
+      .leftJoinAndSelect('passenger.person', 'person')
+      .where('passenger.id = :id', { id })
+      .getOne();
 
-  remove(id: number) {
-    return `This action removes a #${id} passenger`;
+    if (!passenger) {
+      throw new NotFoundException('No passenger was found with this ID');
+    }
+
+    return new GetPassengerDto(passenger.id, passenger.person.name, passenger.person.email);
   }
 }

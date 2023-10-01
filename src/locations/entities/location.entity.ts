@@ -5,9 +5,9 @@ export class Location {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column('decimal', { precision: 10, scale: 6 })
     latitude: number;
 
-    @Column()
+    @Column('decimal', { precision: 10, scale: 6 })
     longitude: number;
 }

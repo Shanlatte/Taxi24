@@ -25,5 +25,5 @@ export class Ride {
     endLocation: Location;
 
     @Column({ type: 'enum', enum: ['waiting', 'active', 'finished', 'cancelled'] })
-    status;
+    status: string;
 }

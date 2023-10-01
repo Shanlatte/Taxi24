@@ -1,12 +1,12 @@
-import { Injectable, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, ConflictException, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateDriverDto } from './dto/create-driver.dto';
-import { UpdateDriverDto } from './dto/update-driver.dto';
 import { GetDriverDto } from './dto/get-driver.dto';
 import { InjectRepository, } from '@nestjs/typeorm';
 import { Driver } from './entities/driver.entity';
-import { FindOptionsWhere, Repository, EntityManager } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { Person } from 'src/persons/entities/person.entity';
 import { Location } from 'src/locations/entities/location.entity';
+import { calculateDistanceBetweenLocations } from 'src/utils/locationsDistanceUtil';
 
 @Injectable()
 export class DriversService {
@@ -20,12 +20,9 @@ export class DriversService {
 
   async create(createDriverDto: CreateDriverDto): Promise<GetDriverDto> {
 
-    const driverFound = await this.personRepository.findOneBy(
-      {
-        email: createDriverDto.email,
-      } as FindOptionsWhere<Person>,
-    );
+    const driverFound = await this.personRepository.findOne({ where: { email: createDriverDto.email } });
 
+    //Check if there is another person with this email
     if (driverFound) {
       throw new ConflictException('There is an existing person with this email');
     }
@@ -36,16 +33,16 @@ export class DriversService {
       const { name, email, latitude, longitude, available } = createDriverDto;
 
       try {
-        const person = this.personRepository.create({ name, email });
+        const person: Person = this.personRepository.create({ name, email });
         await entityManager.save(person);
 
-        const location = this.locationRepository.create({ latitude, longitude });
+        const location: Location = this.locationRepository.create({ latitude, longitude });
         await entityManager.save(location);
 
-        const driver = this.driverRepository.create({ person, location, available });
+        const driver: Driver = this.driverRepository.create({ person, location, available });
         await entityManager.save(driver);
 
-        createdDriverObject = new GetDriverDto(driver.id, person.name, person.email, location.latitude, location.longitude, driver.available);
+        createdDriverObject = new GetDriverDto(driver.id, person, location, driver.available);
 
       } catch (error) {
         throw new InternalServerErrorException('Error creating driver', error);
@@ -55,19 +52,107 @@ export class DriversService {
     return createdDriverObject;
   }
 
-  findAll() {
-    return `This action returns all drivers`;
+  async findAll(): Promise<GetDriverDto[]> {
+    const drivers: Driver[] = await this.driverRepository
+      .createQueryBuilder('driver')
+      .leftJoinAndSelect('driver.person', 'person')
+      .leftJoinAndSelect('driver.location', 'location')
+      .getMany();
+
+    return drivers.map(driver => new GetDriverDto(driver.id, driver.person, driver.location, driver.available))
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} driver`;
+  async findOneById(id: number): Promise<GetDriverDto> {
+
+    const driver: Driver = await this.driverRepository
+      .createQueryBuilder('driver')
+      .leftJoinAndSelect('driver.person', 'person')
+      .leftJoinAndSelect('driver.location', 'location')
+      .where('driver.id = :id', { id })
+      .getOne();
+
+    if (!driver) {
+      throw new NotFoundException('No driver was found with this ID');
+    }
+
+    return new GetDriverDto(driver.id, driver.person, driver.location, driver.available);
   }
 
-  update(id: number, updateDriverDto: UpdateDriverDto) {
-    return `This action updates a #${id} driver`;
+  async findAllAvailable(): Promise<GetDriverDto[]> {
+    const drivers: Driver[] = await this.driverRepository
+      .createQueryBuilder('driver')
+      .leftJoinAndSelect('driver.person', 'person')
+      .leftJoinAndSelect('driver.location', 'location')
+      .where('driver.available = true')
+      .getMany();
+
+    return drivers.map(driver => new GetDriverDto(driver.id, driver.person, driver.location, driver.available))
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} driver`;
+  async findAllAvailableIn3km(latitude: string, longitude: string): Promise<GetDriverDto[]> {
+    const availableDrivers: GetDriverDto[] = await this.findAllAvailable();
+    const nearAvailableDrivers: GetDriverDto[] = [];
+
+    const parsedLatitude: number = parseFloat(latitude);
+    const parsedLongitude: number = parseFloat(longitude);
+
+    if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
+      throw new BadRequestException('Invalid latitude or longitude format');
+    }
+
+    availableDrivers.forEach((driver: GetDriverDto) => {
+      const distance: number = calculateDistanceBetweenLocations(
+        parsedLatitude,
+        parsedLongitude,
+        +driver.latitude,
+        +driver.longitude,
+      );
+
+      if (distance <= 3.0 && distance >= 0) {
+        nearAvailableDrivers.push(driver);
+      }
+    });
+
+    if (!nearAvailableDrivers.length) {
+      throw new NotFoundException('No drivers found');
+    }
+
+    return nearAvailableDrivers;
+  }
+
+  async find3NearestDrivers(latitude: string, longitude: string): Promise<GetDriverDto[]> {
+    const availableDrivers: GetDriverDto[] = await this.findAllAvailable();
+
+    if (!availableDrivers.length) {
+      throw new NotFoundException('No drivers found');
+    }
+
+    const parsedLatitude: number = parseFloat(latitude);
+    const parsedLongitude: number = parseFloat(longitude);
+
+    if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
+      throw new BadRequestException('Invalid latitude or longitude format');
+    }
+
+    const distanceDriversMap: Map<number, GetDriverDto> = new Map();
+    let sortedDrivers: GetDriverDto[] = [];
+
+    availableDrivers.forEach(driver => {
+      const distance: number = calculateDistanceBetweenLocations(
+        parsedLatitude,
+        parsedLongitude,
+        +driver.latitude,
+        +driver.longitude,
+      );
+
+      distanceDriversMap.set(distance, driver);
+    })
+
+    const sortedKeys = Array.from(distanceDriversMap.keys()).sort();
+    for (const key of sortedKeys) {
+      sortedDrivers.push(distanceDriversMap.get(key));
+    }
+
+    return sortedDrivers.slice(0, 3);
   }
 }

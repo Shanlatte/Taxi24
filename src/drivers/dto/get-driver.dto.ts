@@ -1,11 +1,14 @@
+import { Location } from "src/locations/entities/location.entity";
+import { Person } from "src/persons/entities/person.entity";
+
 export class GetDriverDto {
 
-    constructor(id, name, email, latitude, longitude, available) {
+    constructor(id, person : Person, location : Location, available) {
         this.id = id;
-        this.name = name;
-        this.email = email;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.name = person.name;
+        this.email = person.email;
+        this.latitude = location.latitude;
+        this.longitude = location.longitude;
         this.available = available;
     }
     
