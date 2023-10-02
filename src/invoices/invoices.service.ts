@@ -10,14 +10,16 @@ export class InvoicesService {
   ) { }
 
   async findAll(): Promise<Invoice[]> {
-    return await this.invoiceRepository.find();
+    return await this.invoiceRepository.find({ relations: ['ride'] });
   }
 
   async findOneById(id: number): Promise<Invoice> {
-    try {
-      return await this.invoiceRepository.findOneByOrFail({ id });
-    } catch (error) {
-      throw new NotFoundException('No invoice found with this ID')
+    const invoice: Invoice = await this.invoiceRepository.findOne({ where: { id }, relations: ['ride'] });
+
+    if (!invoice) {
+      throw new NotFoundException('No invoice with this ID')
     }
+
+    return invoice;
   }
 }

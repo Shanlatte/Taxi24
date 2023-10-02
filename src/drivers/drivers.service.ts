@@ -53,23 +53,12 @@ export class DriversService {
   }
 
   async findAll(): Promise<GetDriverDto[]> {
-    const drivers: Driver[] = await this.driverRepository
-      .createQueryBuilder('driver')
-      .leftJoinAndSelect('driver.person', 'person')
-      .leftJoinAndSelect('driver.location', 'location')
-      .getMany();
-
+    const drivers: Driver[] = await this.driverRepository.find({ relations: ['person', 'location'] });
     return drivers.map(driver => new GetDriverDto(driver.id, driver.person, driver.location, driver.available))
   }
 
   async findOneById(id: number): Promise<GetDriverDto> {
-
-    const driver: Driver = await this.driverRepository
-      .createQueryBuilder('driver')
-      .leftJoinAndSelect('driver.person', 'person')
-      .leftJoinAndSelect('driver.location', 'location')
-      .where('driver.id = :id', { id })
-      .getOne();
+    const driver: Driver = await this.driverRepository.findOne({ where: { id }, relations: ['person', 'location'] });
 
     if (!driver) {
       throw new NotFoundException('No driver was found with this ID');
@@ -79,12 +68,7 @@ export class DriversService {
   }
 
   async findAllAvailable(): Promise<GetDriverDto[]> {
-    const drivers: Driver[] = await this.driverRepository
-      .createQueryBuilder('driver')
-      .leftJoinAndSelect('driver.person', 'person')
-      .leftJoinAndSelect('driver.location', 'location')
-      .where('driver.available = true')
-      .getMany();
+    const drivers: Driver[] = await this.driverRepository.find({ where: { available: true }, relations: ['person', 'location'] });
 
     return drivers.map(driver => new GetDriverDto(driver.id, driver.person, driver.location, driver.available))
   }

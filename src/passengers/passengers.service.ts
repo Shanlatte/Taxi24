@@ -45,20 +45,13 @@ export class PassengersService {
   }
 
   async findAll(): Promise<GetPassengerDto[]> {
-    const passengers: Passenger[] = await this.passengerRepository
-      .createQueryBuilder('passenger')
-      .leftJoinAndSelect('passenger.person', 'person')
-      .getMany();
+    const passengers: Passenger[] = await this.passengerRepository.find({ relations: ['person'] });
 
     return passengers.map(passenger => new GetPassengerDto(passenger.id, passenger.person.name, passenger.person.email))
   }
 
   async findOneById(id: number): Promise<GetPassengerDto> {
-    const passenger: Passenger = await this.passengerRepository
-      .createQueryBuilder('passenger')
-      .leftJoinAndSelect('passenger.person', 'person')
-      .where('passenger.id = :id', { id })
-      .getOne();
+    const passenger: Passenger = await this.passengerRepository.findOne({ where: { id }, relations: ['person'] });
 
     if (!passenger) {
       throw new NotFoundException('No passenger was found with this ID');
