@@ -33,12 +33,15 @@ export class DriversService {
       const { name, email, latitude, longitude, available } = createDriverDto;
 
       try {
+        // Create person record
         const person: Person = this.personRepository.create({ name, email });
         await entityManager.save(person);
 
+        // Create location record
         const location: Location = this.locationRepository.create({ latitude, longitude });
         await entityManager.save(location);
 
+        // Create driver record
         const driver: Driver = this.driverRepository.create({ person, location, available });
         await entityManager.save(driver);
 
@@ -58,13 +61,14 @@ export class DriversService {
   }
 
   async findOneById(id: number): Promise<GetDriverDto> {
-
+    //Check if the id is not a number
     if (isNaN(id)) {
       throw new BadRequestException('Invalid id format');
     }
 
     const driver: Driver = await this.driverRepository.findOne({ where: { id }, relations: ['person', 'location'] });
 
+    //Check if there is driver with this id
     if (!driver) {
       throw new NotFoundException('No driver was found with this ID');
     }
@@ -85,8 +89,10 @@ export class DriversService {
     const { parsedLatitude, parsedLongitude } = parseLocation(latitude, longitude);
 
     availableDrivers.forEach((driver: GetDriverDto) => {
+      // Get distance in km between the provided location and the driver location
       const distance: number = calculateDistanceBetweenLocations(parsedLatitude, parsedLongitude, +driver.latitude, +driver.longitude,);
 
+      // If the distance is between 0 and 3km, add that driver to the result list
       if (distance <= 3.0 && distance >= 0) {
         nearAvailableDrivers.push(driver);
       }
@@ -102,8 +108,9 @@ export class DriversService {
   async find3NearestDrivers(latitude: string, longitude: string): Promise<GetDriverDto[]> {
     const availableDrivers: GetDriverDto[] = await this.findAllAvailable();
 
+    // Check if there is available drivers
     if (!availableDrivers.length) {
-      throw new NotFoundException('No drivers found');
+      throw new NotFoundException('No available drivers found');
     }
 
     const { parsedLatitude, parsedLongitude } = parseLocation(latitude, longitude);
@@ -112,11 +119,13 @@ export class DriversService {
     let sortedDrivers: GetDriverDto[] = [];
 
     availableDrivers.forEach(driver => {
+      // Get distance in km between the provided location and the driver location
       const distance: number = calculateDistanceBetweenLocations(parsedLatitude, parsedLongitude, +driver.latitude, +driver.longitude,);
 
       distanceDriversMap.set(distance, driver);
     })
 
+    // Sort drivers by distance and add just 3 to the result list
     const sortedKeys = Array.from(distanceDriversMap.keys()).sort();
     for (const key of sortedKeys) {
       sortedDrivers.push(distanceDriversMap.get(key));
