@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreatePassengerDto } from './dto/create-passenger.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Person } from 'src/persons/entities/person.entity';
+import { Person } from '../persons/entities/person.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { GetPassengerDto } from './dto/get-passenger.dto';
 import { Passenger } from './entities/passenger.entity';

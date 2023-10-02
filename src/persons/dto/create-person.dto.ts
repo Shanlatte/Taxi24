@@ -7,7 +7,7 @@ import {
 
 export class CreatePersonDto {
     @IsString()
-    @MinLength(2, { message: 'Name must have atleast 2 characters.' })
+    @MinLength(2, { message: 'Name must have at least 2 characters.' })
     @IsNotEmpty()
     name: string;
 

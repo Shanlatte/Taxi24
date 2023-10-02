@@ -1,13 +1,13 @@
 import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateRideDto } from './dto/create-ride.dto';
-import { Driver } from 'src/drivers/entities/driver.entity';
-import { Location } from 'src/locations/entities/location.entity';
+import { Driver } from '../drivers/entities/driver.entity';
+import { Location } from '../locations/entities/location.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Passenger } from 'src/passengers/entities/passenger.entity';
+import { Passenger } from '../passengers/entities/passenger.entity';
 import { Ride } from './entities/ride.entity';
 import { GetRideDto } from './dto/get-ride.dto';
-import { Invoice } from 'src/invoices/entities/invoice.entity';
+import { Invoice } from '../invoices/entities/invoice.entity';
 
 @Injectable()
 export class RidesService {
@@ -90,14 +90,14 @@ export class RidesService {
     if (rideFound.status !== 'active') {
       throw new BadRequestException(`Ride with ID ${id} is ${rideFound.status}, a ride with 'active' status is expected`);
     }
-
+    let rideUpdate;
     await this.entityManager.transaction(async (entityManager) => {
       try {
         // Set driver available again
         await entityManager.update(Driver, { id: rideFound.driver.id }, { available: true });
 
         // Update ride status to 'finished'
-        await entityManager.update(Ride, id, { status: 'finished' })
+        rideUpdate = await entityManager.update(Ride, id, { status: 'finished' })
 
         // Create ride's invoice
         const date = new Date();
@@ -106,24 +106,21 @@ export class RidesService {
         const invoice = this.invoiceRepository.create({ ride: rideFound, date, amount });
         await entityManager.save(invoice);
 
-        return invoice;
       } catch (error) {
         throw new InternalServerErrorException("Error completing ride")
       }
     })
+
+    return rideUpdate;
   }
 
   async findOneById(id: number): Promise<GetRideDto> {
-    try {
-      const ride: Ride = await this.rideRepository.findOne({ where: { id }, relations: ['passenger', 'driver', 'startLocation', 'endLocation'] });
+    const ride: Ride = await this.rideRepository.findOne({ where: { id }, relations: ['passenger', 'driver', 'startLocation', 'endLocation'] });
 
-      if (!ride) {
-        throw new NotFoundException('No ride was found with this ID');
-      }
-
-      return new GetRideDto(ride.id, ride.passenger, ride.driver, ride.startLocation, ride.endLocation, ride.status);
-    } catch (error) {
-      throw new InternalServerErrorException('Error retrieving ride');
+    if (!ride) {
+      throw new NotFoundException('No ride was found with this ID');
     }
+
+    return new GetRideDto(ride.id, ride.passenger, ride.driver, ride.startLocation, ride.endLocation, ride.status);
   }
 }

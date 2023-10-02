@@ -1,12 +1,12 @@
-import { Injectable, ConflictException, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, ConflictException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { GetDriverDto } from './dto/get-driver.dto';
 import { InjectRepository, } from '@nestjs/typeorm';
 import { Driver } from './entities/driver.entity';
 import { Repository, EntityManager } from 'typeorm';
-import { Person } from 'src/persons/entities/person.entity';
-import { Location } from 'src/locations/entities/location.entity';
-import { calculateDistanceBetweenLocations, parseLocation } from 'src/utils/locationsUtil';
+import { Person } from '../persons/entities/person.entity';
+import { Location } from '../locations/entities/location.entity';
+import { calculateDistanceBetweenLocations, parseLocation } from '../utils/locationsUtil';
 
 @Injectable()
 export class DriversService {
