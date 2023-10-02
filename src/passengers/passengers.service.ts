@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreatePassengerDto } from './dto/create-passenger.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Person } from '../persons/entities/person.entity';
@@ -51,6 +51,11 @@ export class PassengersService {
   }
 
   async findOneById(id: number): Promise<GetPassengerDto> {
+
+    if (isNaN(id)) {
+      throw new BadRequestException('Invalid id format');
+    }
+    
     const passenger: Passenger = await this.passengerRepository.findOne({ where: { id }, relations: ['person'] });
 
     if (!passenger) {

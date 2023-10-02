@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Invoice } from './entities/invoice.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,6 +14,11 @@ export class InvoicesService {
   }
 
   async findOneById(id: number): Promise<Invoice> {
+
+    if (isNaN(id)) {
+      throw new BadRequestException('Invalid id format');
+    }
+    
     const invoice: Invoice = await this.invoiceRepository.findOne({ where: { id }, relations: ['ride'] });
 
     if (!invoice) {
