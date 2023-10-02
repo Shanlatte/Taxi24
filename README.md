@@ -26,8 +26,8 @@ El proyecto consta de 6 entidades:
 - `POST /drivers`, crea un conductor. Recibe como cuerpo: name, email, latitude, longitude, available.
 
 ### Viaje
-- `POST /rides`, crea un viaje. Recibe como cuerpo: idDriver, idPassenger, startLatitude, startLongitude, endLatitude y endLongitude. `*`
-- `PATCH /rides/complete`, coloca el estado del viaje como finalizado. Recibe como parámetro: id. `*`
+- `POST /rides`, crea un viaje. Recibe como cuerpo: driverId, passengerId, startLatitude, startLongitude, endLatitude y endLongitude. `*`
+- `PATCH /rides/complete/:id`, coloca el estado del viaje como finalizado. Recibe como parámetro: id. `*`
 - `GET /rides/active`, obtiene todos los viajes activos. `*`
 - `GET /rides`, obtiene todos los viajes.
 - `GET /rides/:id`, obtiene el viaje encontrado. Recibe el id como parámetro.
