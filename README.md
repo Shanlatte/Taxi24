@@ -37,7 +37,7 @@ El proyecto consta de 6 entidades:
 - `GET /invoices/:id`, obtiene la factura encontrada. Recibe el id como parámetro.
 
 ### Persona
-- `POST /persons`, crea una persona. Recibe como parámetro: name y email.
+- `POST /persons`, crea una persona. Recibe como cuerpo: name y email.
 
 ### Ubicación 
 - `GET /locations`, obtiene la ubicación encontrada. Recibe el id como parámetro.
@@ -121,7 +121,7 @@ npm run test
 ## Extra
 Para la funcionalidad de encontrar conductores teniendo referencias las latidudes y longitudes a un punto en específico se utiliza la fórmula [Haversine](https://barcelonageeks.com/formula-de-haversine-para-encontrar-la-distancia-entre-dos-puntos-en-una-esfera/).
 
-*Nota: Los valores de las ubicaciones de los conductores fueron creados alrededor de estos valores de latitud y longitud, para una mejor experiencia utilizar estos valores en los endpoints necesarios:
+**Nota**: Los valores de las ubicaciones de los conductores fueron creados alrededor de estos valores de latitud y longitud, para una mejor experiencia utilizar estos valores en los endpoints necesarios:
 - `latitude`: 18.444433
 - `longitude`: -69.959997
 
