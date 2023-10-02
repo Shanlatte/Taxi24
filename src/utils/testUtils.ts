@@ -1,3 +1,5 @@
+import { NotFoundException } from "@nestjs/common";
+
 export class RepositoryMock<T> {
     data: T[] = [];
 
@@ -10,6 +12,19 @@ export class RepositoryMock<T> {
         }));
     }
 
+    findOneBy(options) {
+        if (options && options.id) {
+            if (options.id === 99) {
+                throw new NotFoundException('not found;')
+            }
+        }
+        return Promise.resolve(this.data.find(item => {
+            for (const key in options) {
+                if (item[key] !== options[key]) return false;
+            }
+            return true;
+        }));
+    }
     create(createDto): T {
         return { id: 1, ...createDto };
     }

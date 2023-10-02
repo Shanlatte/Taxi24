@@ -1,13 +1,13 @@
 import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateRideDto } from './dto/create-ride.dto';
-import { Driver } from 'src/drivers/entities/driver.entity';
-import { Location } from 'src/locations/entities/location.entity';
+import { Driver } from '../drivers/entities/driver.entity';
+import { Location } from '../locations/entities/location.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Passenger } from 'src/passengers/entities/passenger.entity';
+import { Passenger } from '../passengers/entities/passenger.entity';
 import { Ride } from './entities/ride.entity';
 import { GetRideDto } from './dto/get-ride.dto';
-import { Invoice } from 'src/invoices/entities/invoice.entity';
+import { Invoice } from '../invoices/entities/invoice.entity';
 
 @Injectable()
 export class RidesService {

@@ -1,4 +1,4 @@
-import { Ride } from 'src/rides/entities/ride.entity';
+import { Ride } from '../../rides/entities/ride.entity';
 import { Column, Entity, PrimaryGeneratedColumn, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity()
