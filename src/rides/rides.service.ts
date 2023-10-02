@@ -115,6 +115,11 @@ export class RidesService {
   }
 
   async findOneById(id: number): Promise<GetRideDto> {
+
+    if (isNaN(id)) {
+      throw new BadRequestException('Invalid id format');
+    }
+
     const ride: Ride = await this.rideRepository.findOne({ where: { id }, relations: ['passenger', 'driver', 'startLocation', 'endLocation'] });
 
     if (!ride) {

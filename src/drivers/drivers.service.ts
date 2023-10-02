@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { GetDriverDto } from './dto/get-driver.dto';
 import { InjectRepository, } from '@nestjs/typeorm';
@@ -58,6 +58,11 @@ export class DriversService {
   }
 
   async findOneById(id: number): Promise<GetDriverDto> {
+
+    if (isNaN(id)) {
+      throw new BadRequestException('Invalid id format');
+    }
+
     const driver: Driver = await this.driverRepository.findOne({ where: { id }, relations: ['person', 'location'] });
 
     if (!driver) {
