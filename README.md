@@ -1,73 +1,83 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Taxi24 
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Descripción
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+ Taxi24 es una nueva startup que quiere revolucionar la industria del transporte proporcionando unasolución de marca blanca existentes.
 
-## Installation
+## Requerimientos
+ Para utilizar este proyecto es necesario tener instalado en su dispositivo o entorno: 
+- `nodeJs`
+- `Nestjs`
+- `PostgreSQL`
+
+## Instalación
+ ### Base de datos
+
+Lo primero que hay que hacer es crear la base de datos que utilizaremos para la API, puede hacerlo desde la GUI de su manejador de base de datos o corriendo este script.
 
 ```bash
-$ npm install
+CREATE DATABASE taxi24
+```
+**Nota:** Se recomienda utilizar el nombre taxi24, pero puede usar otro nombre teniendo en cuenta que debe ser colocado en su archivo `.env`.
+
+### Proyecto
+
+Luego de haber clonado el proyecto es necesario crear un archivo `.env` en la ruta raiz de nuestro proyecto con las siguientes variables:
+
+```bash
+DATABASE_HOST
+DATABASE_PORT
+DATABASE_PASSWORD
+DATABASE_USERNAME
+DATABASE_NAME
+```
+**Nota:** El valor de la variable `DATABASE_NAME` debe ser el mismo de la base de datos creada anteriormente.
+
+Un ejemplo de este archivo seria:
+
+```bash
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_PASSWORD=test_password
+DATABASE_USERNAME=test_username
+DATABASE_NAME=taxi24
 ```
 
-## Running the app
+Una vez creado el archivo `.env` es necesario ejecutar el siguiente comando desde la ruta del proyecto para obtener todas las dependencias del proyecto:
 
 ```bash
-# development
+$  npm install           
+```
+
+Luego de instalar todas las dependencias es necesario ejecutar el siguiente comando desde la ruta del proyecto para crear las tablas en la base de datos:
+
+```bash
+$  npm run migration:run            
+```
+
+Despues de haber creado las tablas en la base de datos es necesario ejecutar el siguiente comando desde la ruta del proyecto para crear archivos iniciales en las tablas:
+
+```bash
+$  npm run seed:run             
+```
+
+## Ejecución
+
+Para inicializar el proyecto es necesario ejecutar el siguiente comando:
+
+```bash
 $ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
 
 ## Test
+Para ejecutar las pruebas del proyecto ejecute el siguiente comando:
 
 ```bash
 # unit tests
 $ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
 
-## Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+Creador por Pedro Shanlatte.
