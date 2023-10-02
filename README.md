@@ -86,19 +86,19 @@ DATABASE_NAME=taxi24
 Una vez creado el archivo `.env` es necesario ejecutar el siguiente comando desde la ruta del proyecto para obtener todas las dependencias del proyecto:
 
 ```bash
-$  npm install           
+npm install           
 ```
 
 Luego de instalar todas las dependencias es necesario ejecutar el siguiente comando desde la ruta del proyecto para crear las tablas en la base de datos:
 
 ```bash
-$  npm run migration:run            
+npm run migration:run            
 ```
 
 Despues de haber creado las tablas en la base de datos es necesario ejecutar el siguiente comando desde la ruta del proyecto para crear archivos iniciales en las tablas:
 
 ```bash
-$  npm run seed:run             
+npm run seed:run             
 ```
 
 ## Ejecución
@@ -106,7 +106,7 @@ $  npm run seed:run
 Para inicializar el proyecto es necesario ejecutar el siguiente comando:
 
 ```bash
-$ npm run start
+npm run start
 ```
 
 ## Test
@@ -114,7 +114,7 @@ Para ejecutar las pruebas del proyecto ejecute el siguiente comando:
 
 ```bash
 # pruebas unitarias
-$ npm run test
+npm run test
 ```
 
 
