@@ -52,12 +52,14 @@ export class PassengersService {
 
   async findOneById(id: number): Promise<GetPassengerDto> {
 
+    //Check if the id is not a number
     if (isNaN(id)) {
       throw new BadRequestException('Invalid id format');
     }
     
     const passenger: Passenger = await this.passengerRepository.findOne({ where: { id }, relations: ['person'] });
 
+    //Check if there is passenger with this id
     if (!passenger) {
       throw new NotFoundException('No passenger was found with this ID');
     }
