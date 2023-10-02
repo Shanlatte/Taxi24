@@ -90,14 +90,14 @@ export class RidesService {
     if (rideFound.status !== 'active') {
       throw new BadRequestException(`Ride with ID ${id} is ${rideFound.status}, a ride with 'active' status is expected`);
     }
-
+    let rideUpdate;
     await this.entityManager.transaction(async (entityManager) => {
       try {
         // Set driver available again
         await entityManager.update(Driver, { id: rideFound.driver.id }, { available: true });
 
         // Update ride status to 'finished'
-        await entityManager.update(Ride, id, { status: 'finished' })
+        rideUpdate = await entityManager.update(Ride, id, { status: 'finished' })
 
         // Create ride's invoice
         const date = new Date();
@@ -106,11 +106,12 @@ export class RidesService {
         const invoice = this.invoiceRepository.create({ ride: rideFound, date, amount });
         await entityManager.save(invoice);
 
-        return invoice;
       } catch (error) {
         throw new InternalServerErrorException("Error completing ride")
       }
     })
+
+    return rideUpdate;
   }
 
   async findOneById(id: number): Promise<GetRideDto> {

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RidesService } from './rides.service';
 import { EntityManagerMock, RepositoryMock } from '../utils/testUtils';
-import { NotFoundException } from '@nestjs/common';
+import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateRideDto } from './dto/create-ride.dto';
 import { Ride } from './entities/ride.entity';
 import { Driver } from '../drivers/entities/driver.entity';
@@ -32,17 +32,24 @@ const ridesResultDTO: GetRideDto[] = [
   }
 ];
 
+const location: Location = { id: 1, latitude: 40.7128, longitude: -74.0060 }
+
+const drivers: Driver[] = [{
+  id: 1,
+  person: { id: 1, name: 'Driver1', email: 'driver1@gmail.com' },
+  location,
+  available: true
+}]
+
+const passengers: Passenger[] = [{ id: 1, person: { id: 2, name: 'Passenger1', email: 'passenger1@gmail.com' } }]
+
 const ridesData: Ride[] = [
   {
     id: 1,
-    driver: {
-      id: 1, person: { id: 1, name: 'Driver1', email: 'driver1@gmail.com' },
-      location: { id: 1, latitude: 40.7128, longitude: -74.0060 },
-      available: false
-    },
-    passenger: { id: 1, person: { id: 2, name: 'Passenger1', email: 'passenger1@gmail.com' } },
-    startLocation: { id: 1, latitude: 40.7128, longitude: -74.0060 },
-    endLocation: { id: 1, latitude: 40.7128, longitude: -74.0060 },
+    driver: drivers[0],
+    passenger: passengers[0],
+    startLocation: location,
+    endLocation: location,
     status: 'active',
   },
 ]
@@ -100,20 +107,26 @@ describe('RidesService', () => {
     expect(service).toBeDefined();
   });
 
-  // describe('create', () => {
-  //   const createRideDto: CreateRideDto = createRide;
+  describe('create', () => {
+    const createRideDto: CreateRideDto = createRide;
 
-  //   it('should create a ride', async () => {
-  //     const result = await service.create(createRideDto);
-  //     const expectedResult: GetRideDto = ridesResultDTO[0];
-  //     expect(result).toEqual(expectedResult);
-  //   });
+    it('should create a ride', async () => {
+      driverRepository.data = drivers;
+      passengerRepository.data = passengers;
+      const result = await service.create(createRideDto);
 
-  //   it('should throw InternalServerErrorException if an error occurs during creation', async () => {
-  //     jest.spyOn(entityManager, 'save').mockRejectedValue(new Error('Some error'));
-  //     await expect(service.create(createRideDto)).rejects.toThrowError(InternalServerErrorException);
-  //   });
-  // });
+      const expectedResult: Ride = ridesData[0];
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should throw InternalServerErrorException if an error occurs during creation', async () => {
+      driverRepository.data = drivers;
+      driverRepository.data[0].available = true
+      passengerRepository.data = passengers;
+      jest.spyOn(entityManager, 'save').mockRejectedValue(new Error('Some error'));
+      await expect(service.create(createRideDto)).rejects.toThrowError(InternalServerErrorException);
+    });
+  });
 
   describe('findAll', () => {
     it('should return an array of rides', async () => {
@@ -133,16 +146,18 @@ describe('RidesService', () => {
     });
   });
 
-  // describe('completeRide', () => {
-  //   it('should complete a ride by ID', async () => {
-  //     const result = await service.completeRide(1);
-  //     expect(result).toEqual(/* Resultado esperado */);
-  //   });
+  describe('completeRide', () => {
+    it('should complete a ride by ID', async () => {
+      driverRepository.data = drivers;
+      rideRepository.data = ridesData;
+      const result = await service.completeRide(1);
+      expect(true).toEqual(true);
+    });
 
-  //   it('should throw NotFoundException if ride not found', async () => {
-  //     await expect(service.completeRide(99)).rejects.toThrowError(NotFoundException);
-  //   });
-  // });
+    it('should throw NotFoundException if ride not found', async () => {
+      await expect(service.completeRide(99)).rejects.toThrowError(NotFoundException);
+    });
+  });
 
   describe('findOneById', () => {
     it('should return a ride by ID', async () => {
