@@ -6,7 +6,7 @@ import { Driver } from './entities/driver.entity';
 import { Repository, EntityManager } from 'typeorm';
 import { Person } from 'src/persons/entities/person.entity';
 import { Location } from 'src/locations/entities/location.entity';
-import { calculateDistanceBetweenLocations } from 'src/utils/locationsDistanceUtil';
+import { calculateDistanceBetweenLocations, parseLocation } from 'src/utils/locationsUtil';
 
 @Injectable()
 export class DriversService {
@@ -53,23 +53,12 @@ export class DriversService {
   }
 
   async findAll(): Promise<GetDriverDto[]> {
-    const drivers: Driver[] = await this.driverRepository
-      .createQueryBuilder('driver')
-      .leftJoinAndSelect('driver.person', 'person')
-      .leftJoinAndSelect('driver.location', 'location')
-      .getMany();
-
+    const drivers: Driver[] = await this.driverRepository.find({ relations: ['person', 'location'] });
     return drivers.map(driver => new GetDriverDto(driver.id, driver.person, driver.location, driver.available))
   }
 
   async findOneById(id: number): Promise<GetDriverDto> {
-
-    const driver: Driver = await this.driverRepository
-      .createQueryBuilder('driver')
-      .leftJoinAndSelect('driver.person', 'person')
-      .leftJoinAndSelect('driver.location', 'location')
-      .where('driver.id = :id', { id })
-      .getOne();
+    const driver: Driver = await this.driverRepository.findOne({ where: { id }, relations: ['person', 'location'] });
 
     if (!driver) {
       throw new NotFoundException('No driver was found with this ID');
@@ -79,12 +68,7 @@ export class DriversService {
   }
 
   async findAllAvailable(): Promise<GetDriverDto[]> {
-    const drivers: Driver[] = await this.driverRepository
-      .createQueryBuilder('driver')
-      .leftJoinAndSelect('driver.person', 'person')
-      .leftJoinAndSelect('driver.location', 'location')
-      .where('driver.available = true')
-      .getMany();
+    const drivers: Driver[] = await this.driverRepository.find({ where: { available: true }, relations: ['person', 'location'] });
 
     return drivers.map(driver => new GetDriverDto(driver.id, driver.person, driver.location, driver.available))
   }
@@ -93,20 +77,10 @@ export class DriversService {
     const availableDrivers: GetDriverDto[] = await this.findAllAvailable();
     const nearAvailableDrivers: GetDriverDto[] = [];
 
-    const parsedLatitude: number = parseFloat(latitude);
-    const parsedLongitude: number = parseFloat(longitude);
-
-    if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
-      throw new BadRequestException('Invalid latitude or longitude format');
-    }
+    const { parsedLatitude, parsedLongitude } = parseLocation(latitude, longitude);
 
     availableDrivers.forEach((driver: GetDriverDto) => {
-      const distance: number = calculateDistanceBetweenLocations(
-        parsedLatitude,
-        parsedLongitude,
-        +driver.latitude,
-        +driver.longitude,
-      );
+      const distance: number = calculateDistanceBetweenLocations(parsedLatitude, parsedLongitude, +driver.latitude, +driver.longitude,);
 
       if (distance <= 3.0 && distance >= 0) {
         nearAvailableDrivers.push(driver);
@@ -127,23 +101,13 @@ export class DriversService {
       throw new NotFoundException('No drivers found');
     }
 
-    const parsedLatitude: number = parseFloat(latitude);
-    const parsedLongitude: number = parseFloat(longitude);
-
-    if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
-      throw new BadRequestException('Invalid latitude or longitude format');
-    }
+    const { parsedLatitude, parsedLongitude } = parseLocation(latitude, longitude);
 
     const distanceDriversMap: Map<number, GetDriverDto> = new Map();
     let sortedDrivers: GetDriverDto[] = [];
 
     availableDrivers.forEach(driver => {
-      const distance: number = calculateDistanceBetweenLocations(
-        parsedLatitude,
-        parsedLongitude,
-        +driver.latitude,
-        +driver.longitude,
-      );
+      const distance: number = calculateDistanceBetweenLocations(parsedLatitude, parsedLongitude, +driver.latitude, +driver.longitude,);
 
       distanceDriversMap.set(distance, driver);
     })

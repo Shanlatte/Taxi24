@@ -1,3 +1,5 @@
+import { BadRequestException } from "@nestjs/common";
+
 function convertDegreesToRadian(degrees: number): number {
     return (degrees / 180) * Math.PI;
 }
@@ -5,10 +7,10 @@ function convertDegreesToRadian(degrees: number): number {
 // Function used to calculate distance between locations, the formula used is "Haversine", which calculates the 
 // shortest distance between two points on a sphere using their latitudes and longitudes measured along the surface.
 export function calculateDistanceBetweenLocations(
-    degreesLatitude1: number = 0,
-    degreesLongitude1: number = 0,
-    degreesLatitude2: number = 0,
-    degreesLongitude2: number = 0): number {
+    degreesLatitude1: number,
+    degreesLongitude1: number,
+    degreesLatitude2: number,
+    degreesLongitude2: number): number {
 
     const latitude1: number = convertDegreesToRadian(degreesLatitude1);
     const latitude2: number = convertDegreesToRadian(degreesLatitude2);
@@ -32,3 +34,14 @@ export function calculateDistanceBetweenLocations(
     const distance: number = 2 * earthRadiusInKm * Math.asin(sqrtResult);
     return parseFloat(distance.toFixed(6));
 };
+
+export function parseLocation(latitude: string, longitude: string) {
+    const parsedLatitude: number = parseFloat(latitude);
+    const parsedLongitude: number = parseFloat(longitude);
+
+    if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
+        throw new BadRequestException('Invalid latitude or longitude format');
+    }
+
+    return { parsedLatitude, parsedLongitude }
+}

@@ -6,13 +6,9 @@ export class GetRideDto {
     constructor(id: number, passenger: Passenger, driver: Driver, startLocation: Location, endLocation: Location, status: string) {
         this.id = id;
         this.passengerId = passenger.id;
-        this.passengerName = passenger.person.name;
         this.driverId = driver.id;
-        this.driverName = driver.person.name;
-        this.startLatitude = startLocation.latitude;
-        this.startLongitude = startLocation.longitude;
-        this.endLatitude = endLocation.latitude;
-        this.endLongitude = endLocation.longitude;
+        this.startLocationId = startLocation.id;
+        this.endLocationId = endLocation.id;
         this.status = status;
     }
 
@@ -20,19 +16,11 @@ export class GetRideDto {
 
     passengerId: number;
 
-    passengerName: string;
-
     driverId: number;
 
-    driverName: string;
+    startLocationId: number;
 
-    startLatitude: number;
-
-    startLongitude: number;
-
-    endLatitude: number;
-
-    endLongitude: number;
+    endLocationId: number;
 
     status: string;
 }

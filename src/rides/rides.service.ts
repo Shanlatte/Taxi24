@@ -21,13 +21,8 @@ export class RidesService {
     private readonly entityManager: EntityManager,
   ) { }
 
-  async create(createRideDto: CreateRideDto): Promise<GetRideDto> {
-
-    const driver = await this.driverRepository
-      .createQueryBuilder('driver')
-      .leftJoinAndSelect('driver.person', 'person')
-      .where('driver.id = :id', { id: createRideDto.driverId })
-      .getOne();
+  async create(createRideDto: CreateRideDto): Promise<Ride> {
+    const driver = await this.driverRepository.findOneBy({ id: createRideDto.driverId });
 
     if (!driver) {
       throw new NotFoundException('No driver was found with this ID');
@@ -37,11 +32,7 @@ export class RidesService {
       throw new BadRequestException('The driver with this ID is not available');
     }
 
-    const passenger = await this.passengerRepository
-      .createQueryBuilder('passenger')
-      .leftJoinAndSelect('passenger.person', 'person')
-      .where('passenger.id = :id', { id: createRideDto.passengerId })
-      .getOne();
+    const passenger = await this.passengerRepository.findOneBy({ id: createRideDto.passengerId });
 
     if (!passenger) {
       throw new NotFoundException('No passenger was found with this ID');
@@ -53,8 +44,7 @@ export class RidesService {
       throw new BadRequestException('The passenger with this ID is currently on a ride');
     }
 
-    let createdRideObject: GetRideDto;
-
+    let ride = new Ride();
     await this.entityManager.transaction(async (entityManager) => {
       const { startLatitude, startLongitude, endLatitude, endLongitude } = createRideDto;
 
@@ -68,55 +58,30 @@ export class RidesService {
         const endLocation = this.locationRepository.create({ latitude: endLatitude, longitude: endLongitude });
         await entityManager.save(endLocation);
 
-        const ride = this.rideRepository.create({ driver, passenger, startLocation, endLocation, status: 'active' });
+        ride = this.rideRepository.create({ driver, passenger, startLocation, endLocation, status: 'active' });
         await entityManager.save(ride);
 
-        createdRideObject = new GetRideDto(ride.id, passenger, driver, startLocation, endLocation, ride.status)
       } catch (error) {
         throw new InternalServerErrorException(error);
       }
     })
 
-    return createdRideObject;
+    return ride;
   }
 
   async findAll(): Promise<GetRideDto[]> {
-    const rides: Ride[] = await this.rideRepository
-      .createQueryBuilder('ride')
-      .leftJoinAndSelect('ride.passenger', 'passenger')
-      .leftJoinAndSelect('passenger.person', 'personP')
-      .leftJoinAndSelect('ride.driver', 'driver')
-      .leftJoinAndSelect('driver.person', 'personD')
-      .leftJoinAndSelect('ride.startLocation', 'startLocation')
-      .leftJoinAndSelect('ride.endLocation', 'endLocation')
-      .getMany();
-
+    const rides: Ride[] = await this.rideRepository.find({ relations: ['passenger', 'driver', 'startLocation', 'endLocation'] });
     return rides.map(ride => new GetRideDto(ride.id, ride.passenger, ride.driver, ride.startLocation, ride.endLocation, ride.status));
   }
 
   async findAllActive(): Promise<GetRideDto[]> {
-    const rides: Ride[] = await this.rideRepository
-      .createQueryBuilder('ride')
-      .leftJoinAndSelect('ride.passenger', 'passenger')
-      .leftJoinAndSelect('passenger.person', 'personP')
-      .leftJoinAndSelect('ride.driver', 'driver')
-      .leftJoinAndSelect('driver.person', 'personD')
-      .leftJoinAndSelect('ride.startLocation', 'startLocation')
-      .leftJoinAndSelect('ride.endLocation', 'endLocation')
-      .where("ride.status = 'active'")
-      .getMany();
-
+    const rides: Ride[] = await this.rideRepository.find({ where: { status: 'active' }, relations: ['passenger', 'driver', 'startLocation', 'endLocation'] });
     return rides.map(ride => new GetRideDto(ride.id, ride.passenger, ride.driver, ride.startLocation, ride.endLocation, ride.status));
   }
 
   async completeRide(id: number) {
     //Check if the ride exists
-    const rideFound: Ride = await this.rideRepository
-      .createQueryBuilder('ride')
-      .leftJoinAndSelect('ride.driver', 'driver')
-      .leftJoinAndSelect('ride.passenger', 'passenger')
-      .where('ride.id = :id', { id })
-      .getOne();
+    const rideFound: Ride = await this.rideRepository.findOne({ where: { id }, relations: ['driver'] });
 
     if (!rideFound) {
       throw new NotFoundException('No ride was found with this ID');
@@ -148,18 +113,9 @@ export class RidesService {
     })
   }
 
-  async findOneById(id: number) {
+  async findOneById(id: number): Promise<GetRideDto> {
     try {
-      const ride: Ride = await this.rideRepository
-        .createQueryBuilder('ride')
-        .leftJoinAndSelect('ride.passenger', 'passenger')
-        .leftJoinAndSelect('passenger.person', 'personP')
-        .leftJoinAndSelect('ride.driver', 'driver')
-        .leftJoinAndSelect('driver.person', 'personD')
-        .leftJoinAndSelect('ride.startLocation', 'startLocation')
-        .leftJoinAndSelect('ride.endLocation', 'endLocation')
-        .where('ride.id = :id', { id })
-        .getOne();
+      const ride: Ride = await this.rideRepository.findOne({ where: { id }, relations: ['passenger', 'driver', 'startLocation', 'endLocation'] });
 
       if (!ride) {
         throw new NotFoundException('No ride was found with this ID');
@@ -167,7 +123,7 @@ export class RidesService {
 
       return new GetRideDto(ride.id, ride.passenger, ride.driver, ride.startLocation, ride.endLocation, ride.status);
     } catch (error) {
-      throw new InternalServerErrorException('Error retrieving ride')
+      throw new InternalServerErrorException('Error retrieving ride');
     }
   }
 }
