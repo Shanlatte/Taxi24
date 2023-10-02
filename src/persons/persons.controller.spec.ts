@@ -15,7 +15,7 @@ describe('PersonsController', () => {
       providers: [
         PersonsService,
         {
-          provide: getRepositoryToken(Person), // Simulate Person repository
+          provide: getRepositoryToken(Person),
           useValue: {},
         },
       ],

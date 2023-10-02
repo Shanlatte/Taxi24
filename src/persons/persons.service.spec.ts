@@ -5,7 +5,6 @@ import { Person } from './entities/person.entity';
 import { Repository } from 'typeorm';
 import { CreatePersonDto } from './dto/create-person.dto';
 
-// Mock del Repositorio de TypeORM
 const personRepositoryMock = {
   create: jest.fn(),
   save: jest.fn(),

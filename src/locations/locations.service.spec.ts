@@ -6,7 +6,6 @@ import { Location } from './entities/location.entity';
 
 const locations: Location[] = [{ id: 1, latitude: -31.2, longitude: -48.5 }, { id: 2, latitude: -41.2, longitude: -58.5 }, { id: 3, latitude: -91.2, longitude: -30.5 }];
 
-// LocationRepository mock
 class LocationRepositoryMock {
   find() {
     return Promise.resolve(locations);
@@ -23,7 +22,7 @@ describe('LocationsService', () => {
         LocationsService,
         {
           provide: getRepositoryToken(Location),
-          useClass: LocationRepositoryMock, // LocationRepository mock
+          useClass: LocationRepositoryMock,
         },
       ],
     }).compile();

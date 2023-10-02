@@ -15,10 +15,8 @@ class PersonRepositoryMock {
   findOne() {
     return Promise.resolve({})
   }
-  // Implementa los métodos necesarios simulados para tus pruebas
 }
 
-// PassengersService Mock
 class PassengersServiceMock {
   create(createPassengerDto: CreatePassengerDto) {
     return { id: 1, ...createPassengerDto };
@@ -48,11 +46,11 @@ describe('PassengersController', () => {
       providers: [
         {
           provide: PassengersService,
-          useClass: PassengersServiceMock, // PassengersService mock
+          useClass: PassengersServiceMock, 
         },
         {
           provide: getRepositoryToken(Person),
-          useClass: PersonRepositoryMock, // PersonRepository mock
+          useClass: PersonRepositoryMock,
         },
       ],
     }).compile();

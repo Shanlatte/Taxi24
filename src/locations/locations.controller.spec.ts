@@ -5,7 +5,6 @@ import { Location } from './entities/location.entity';
 
 const locations: Location[] = [{ id: 1, latitude: -31.2, longitude: -48.5 }, { id: 2, latitude: -41.2, longitude: -58.5 }, { id: 3, latitude: -91.2, longitude: -30.5 }];
 
-// Mock de LocationsService
 class LocationsServiceMock {
   findAll() {
     return locations;
@@ -22,7 +21,7 @@ describe('LocationsController', () => {
       providers: [
         {
           provide: LocationsService,
-          useClass: LocationsServiceMock, //LocationsService Mock
+          useClass: LocationsServiceMock,
         },
       ],
     }).compile();
