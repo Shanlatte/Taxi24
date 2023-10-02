@@ -114,16 +114,12 @@ export class RidesService {
   }
 
   async findOneById(id: number): Promise<GetRideDto> {
-    try {
-      const ride: Ride = await this.rideRepository.findOne({ where: { id }, relations: ['passenger', 'driver', 'startLocation', 'endLocation'] });
+    const ride: Ride = await this.rideRepository.findOne({ where: { id }, relations: ['passenger', 'driver', 'startLocation', 'endLocation'] });
 
-      if (!ride) {
-        throw new NotFoundException('No ride was found with this ID');
-      }
-
-      return new GetRideDto(ride.id, ride.passenger, ride.driver, ride.startLocation, ride.endLocation, ride.status);
-    } catch (error) {
-      throw new InternalServerErrorException('Error retrieving ride');
+    if (!ride) {
+      throw new NotFoundException('No ride was found with this ID');
     }
+
+    return new GetRideDto(ride.id, ride.passenger, ride.driver, ride.startLocation, ride.endLocation, ride.status);
   }
 }

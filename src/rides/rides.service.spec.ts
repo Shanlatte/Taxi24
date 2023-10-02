@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RidesService } from './rides.service';
 import { EntityManagerMock, RepositoryMock } from '../utils/testUtils';
-import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { CreateRideDto } from './dto/create-ride.dto';
 import { Ride } from './entities/ride.entity';
 import { Driver } from '../drivers/entities/driver.entity';
