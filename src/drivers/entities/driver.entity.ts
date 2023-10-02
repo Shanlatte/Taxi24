@@ -1,5 +1,5 @@
-import { Location } from 'src/locations/entities/location.entity';
-import { Person } from 'src/persons/entities/person.entity';
+import { Location } from '../../locations/entities/location.entity';
+import { Person } from '../../persons/entities/person.entity';
 import { Column, Entity, PrimaryGeneratedColumn, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity()

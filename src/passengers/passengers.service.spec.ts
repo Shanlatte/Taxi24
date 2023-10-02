@@ -7,50 +7,9 @@ import { EntityManager } from 'typeorm';
 import { CreatePassengerDto } from './dto/create-passenger.dto';
 import { GetPassengerDto } from './dto/get-passenger.dto';
 import { Passenger } from './entities/passenger.entity';
-
+import { RepositoryMock, EntityManagerMock } from '../utils/testUtils';
 
 const passengersDto: GetPassengerDto[] = [{ id: 1, name: 'Passenger1', email: 'passenger1@gmail.com' }];
-
-// Mocks
-class RepositoryMock<T> {
-  data: T[] = [];
-
-  findOne(options: any) {
-    return Promise.resolve(this.data.find(item => {
-      for (const key in options.where) {
-        if (item[key] !== options.where[key]) return false;
-      }
-      return true;
-    }));
-  }
-
-  create(createDto: any): T {
-    return { id: 1, ...createDto };
-  }
-
-  async save(entity: T) {
-    this.data.push(entity);
-    return Promise.resolve(entity);
-  }
-
-  find(options?: any): Promise<T[]> {
-    return Promise.resolve(this.data.filter(item => {
-      for (const key in options?.where) {
-        if (item[key] !== options.where[key]) return false;
-      }
-      return true;
-    }));
-  }
-}
-
-class EntityManagerMock {
-  transaction(callback: (entityManager) => Promise<any>) {
-    return callback(this);
-  }
-  save() {
-    return Promise.resolve({});
-  }
-}
 
 describe('PassengersService', () => {
   let service: PassengersService;
