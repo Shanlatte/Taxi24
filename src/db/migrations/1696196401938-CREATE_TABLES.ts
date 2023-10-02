@@ -32,6 +32,7 @@ export class CREATETABLES1696196401938 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "driver" DROP CONSTRAINT "FK_a1627d34fa5d5d4cafec64f4ad0"`);
         await queryRunner.query(`DROP TABLE "invoice"`);
         await queryRunner.query(`DROP TABLE "ride"`);
+        await queryRunner.query(`DROP TYPE "public"."ride_status_enum"`);
         await queryRunner.query(`DROP TABLE "passenger"`);
         await queryRunner.query(`DROP TABLE "driver"`);
         await queryRunner.query(`DROP TABLE "person"`);
